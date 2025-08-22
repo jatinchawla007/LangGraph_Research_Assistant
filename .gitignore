@@ -1,2 +1,4 @@
 .env
 .venv
+__pycache__
+research_final_history.db
