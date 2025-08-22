@@ -16,6 +16,11 @@ class GraphState(TypedDict):
         source_summaries: A list of summaries for each researched source.
         final_brief: The compiled final research brief.
     """
+    # Inputs
+    topic: str
+    user_id: str
+    follow_up: bool
+
     topic: str
     research_plan: Optional[ResearchPlan] = None
     search_results: Optional[List[dict]] = None

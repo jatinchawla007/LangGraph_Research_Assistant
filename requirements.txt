@@ -4,3 +4,4 @@ langchain-community
 tavily-python
 pydantic
 python-dotenv
+sqlite3

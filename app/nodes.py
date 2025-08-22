@@ -3,33 +3,44 @@
 from .graph_state import GraphState
 from .llm import smart_llm, tavily_tool, fast_llm, tavily_client
 from .schemas import ResearchPlan, SourceSummary, FinalBrief
+from .database import get_briefs_by_user
 
 from langchain_community.document_loaders import WebBaseLoader
 import pprint
 import json
 
-
-
+def entry_point(state: GraphState) -> dict:
+    """
+    A dummy node that just starts the graph and does nothing to the state.
+    This is the entry point from which our conditional routing will branch.
+    """
+    print("--- 🚀 Starting Research Graph ---")
+    return {} # Must return a dictionary, even if it's empty
 
 def generate_research_plan(state: GraphState) -> dict:
     """
-
-    Generates a research plan based on the user's topic.
-
-    Args:
-        state: The current graph state.
-
-    Returns:
-        A dictionary with the updated research_plan.
+    Generates a research plan based on the user's topic and conversation history.
     """
     print("--- 🧠 Generating Research Plan ---")
     topic = state["topic"]
+    context = state.get("context_summary", "") # Use .get() for safety
 
-    # Define the structured output chain
     planner = smart_llm.with_structured_output(ResearchPlan)
 
-    # Create the prompt
-    prompt = f"""As a professional research assistant, create a detailed and actionable research plan for the following topic: '{topic}'.
+    # --- Learning Point: Context-Aware Prompting ---
+    # We now check if there's a context summary. If so, we use a more
+    # sophisticated prompt that instructs the LLM to consider the past
+    # conversation, leading to more relevant and non-repetitive research plans.
+    if context:
+        prompt = f"""As a professional research assistant, create a detailed and actionable research plan for the following topic: '{topic}'.
+
+Please consider the following summary of our previous conversation as crucial context. Ensure your new plan builds upon or explores different angles from the previous research, and does not repeat questions or search queries that have already been addressed.
+
+Previous conversation summary:
+---
+{context}
+
+As a professional research assistant, create a detailed and actionable research plan for the following topic: '{topic}'.
     
     Your plan must include:
     1. A list of 3 specific research questions that need to be answered.
@@ -37,9 +48,17 @@ def generate_research_plan(state: GraphState) -> dict:
     
     Ensure the plan is comprehensive and directly addresses the user's topic."""
 
-    # Invoke the chain to get the structured plan
-    plan = planner.invoke(prompt)
+    else:
+        prompt = f"""As a professional research assistant, create a detailed and actionable research plan for the following topic: '{topic}'.
+    
+    Your plan must include:
+    1. A list of 3 specific research questions that need to be answered.
+    2. A list of 3 search engine queries that will be used to find relevant information.
+    
+    Ensure the plan is comprehensive and directly addresses the user's topic."""
 
+
+    plan = planner.invoke(prompt)
     return {"research_plan": plan}
 
 
@@ -150,3 +169,59 @@ Here are the source summaries in JSON format:
     final_brief = synthesizer.invoke(prompt)
     
     return {"final_brief": final_brief}
+
+
+# --- NEW MEMORY NODE ---
+def summarize_context(state: GraphState) -> dict:
+    """
+    Summarizes the user's past research briefs to provide context for the new query.
+    """
+    print("---📝 Summarizing Context---")
+    user_id = state["user_id"]
+    
+    past_briefs = get_briefs_by_user(user_id)
+    
+    if not past_briefs:
+        print("No past briefs found for this user.")
+        return {"context_summary": ""}
+
+    # Format the past briefs for the LLM prompt
+    formatted_history = "\n\n---\n\n".join(
+        [f"Topic: {b.topic}\nIntroduction: {b.introduction}" for b in past_briefs]
+    )
+
+    prompt = f"""Based on the user's previous research briefs, provide a concise, one-paragraph summary of their past interests and key findings. This summary will be used as context for their new research query.
+
+Here is the user's past research history:
+{formatted_history}
+"""
+    
+    # --- Learning Point: Reusing LLMs ---
+    # Context summarization is a quick, factual task, making it a
+    # perfect use case for our efficient `fast_llm`.
+    summary_message = fast_llm.invoke(prompt)
+    
+    summary = summary_message.content
+    print(f"Generated Context Summary: {summary}")
+
+    return {"context_summary": summary}
+
+
+# --- NEW ROUTER NODE ---
+def route_to_context_or_planner(state: GraphState) -> str:
+    """
+    A router to decide whether to summarize context or go straight to planning.
+
+    Args:
+        state: The current graph state.
+
+    Returns:
+        A string indicating the next node to execute.
+    """
+    print("--- 🚦 Routing ---")
+    if state["follow_up"]:
+        print("Follow-up detected, routing to context summarizer.")
+        return "summarize_context"
+    else:
+        print("No follow-up, routing directly to planner.")
+        return "planner"
