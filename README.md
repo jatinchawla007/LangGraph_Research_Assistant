@@ -126,9 +126,9 @@ Analysis of various sources indicates that AI's role in art is multifaceted. AI 
 
 ## 📝 To-Do & Future Enhancements
 
--   [ ] **Implement Contextual Memory for Follow-ups**: Add a memory store (e.g., a dictionary or Redis) to save user briefs. Create a conditional entry point in the graph to summarize past interactions for follow-up questions, making the assistant context-aware.
--   [ ] **Expose via FastAPI & CLI**: Wrap the LangGraph application in a **FastAPI** server to expose a `POST /brief` endpoint. Additionally, create a formal **Command-Line Interface (CLI)** using `Typer` or `argparse` to accept the topic and other parameters.
--   [ ] **Integrate LangGraph Checkpointing**: Add a persistent checkpointer (e.g., `SqliteSaver`) to the graph. This makes the workflow resumable, which is critical for long-running research tasks that might be interrupted.
+-  <del> [ ] **Implement Contextual Memory for Follow-ups**: Add a memory store (e.g., a dictionary or Redis) to save user briefs. Create a conditional entry point in the graph to summarize past interactions for follow-up questions, making the assistant context-aware. </del>
+-  <del>  [ ] **Expose via FastAPI & CLI**: Wrap the LangGraph application in a **FastAPI** server to expose a `POST /brief` endpoint. Additionally, create a formal **Command-Line Interface (CLI)** using `Typer` or `argparse` to accept the topic and other parameters. </del>
+-  <del>  [ ] **Integrate LangGraph Checkpointing**: Add a persistent checkpointer (e.g., `SqliteSaver`) to the graph. This makes the workflow resumable, which is critical for long-running research tasks that might be interrupted.  </del>
 -   [ ] **Add Human-in-the-Loop Validation**: Introduce an interruption step after the `planner` node. The graph would pause and wait for user approval on the generated research plan via an API call before proceeding with the costly search and summarization steps.
 
 ## 📄 License
