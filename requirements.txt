@@ -5,3 +5,5 @@ tavily-python
 pydantic
 python-dotenv
 sqlite3
+uvicorn
+fastapi

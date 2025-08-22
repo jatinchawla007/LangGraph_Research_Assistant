@@ -51,9 +51,9 @@ def build_graph():
 if __name__ == "__main__":
     init_db()
     app = build_graph()
-    graph_diagram = app.get_graph().draw_mermaid_png()
-    with open("graph_diagram.png", "wb") as f:
-        f.write(graph_diagram)
+    #graph_diagram = app.get_graph().draw_mermaid_png()
+    #with open("graph_diagram.png", "wb") as f:
+    #   f.write(graph_diagram)
 
     # --- Interactive Loop ---
     while True:

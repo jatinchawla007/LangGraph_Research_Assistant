@@ -32,3 +32,11 @@ class FinalBrief(BaseModel):
     synthesis: str = Field(..., description="A synthesized summary combining information from all sources to answer the research questions.")
     references: List[SourceSummary] = Field(..., description="A list of the summarized sources used to compile the brief.")
     potential_follow_ups: List[str] = Field(..., description="Suggestions for follow-up research questions.")
+
+class BriefRequest(BaseModel):
+    """
+    This schema defines the structure of a request for a research brief.
+    """
+    user_id: str = Field(..., description="The ID of the user requesting the brief.")
+    topic: str = Field(..., description="The main topic of the research brief.")
+    follow_up: bool = False

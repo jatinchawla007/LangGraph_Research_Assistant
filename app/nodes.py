@@ -17,46 +17,62 @@ def entry_point(state: GraphState) -> dict:
     print("--- 🚀 Starting Research Graph ---")
     return {} # Must return a dictionary, even if it's empty
 
+# --- FINAL, DEBUGGED PLANNER NODE ---
 def generate_research_plan(state: GraphState) -> dict:
     """
-    Generates a research plan based on the user's topic and conversation history.
+    Generates a research plan. If it's a follow-up, it first rewrites the
+    topic to be self-contained based on the conversation history.
     """
     print("--- 🧠 Generating Research Plan ---")
     topic = state["topic"]
-    context = state.get("context_summary", "") # Use .get() for safety
+    context = state.get("context_summary", "")
 
+    # The planner will always use the powerful model
     planner = smart_llm.with_structured_output(ResearchPlan)
-
-    # --- Learning Point: Context-Aware Prompting ---
-    # We now check if there's a context summary. If so, we use a more
-    # sophisticated prompt that instructs the LLM to consider the past
-    # conversation, leading to more relevant and non-repetitive research plans.
+    
+    # If context exists, we first create a standalone topic
     if context:
-        prompt = f"""As a professional research assistant, create a detailed and actionable research plan for the following topic: '{topic}'.
+        # This print statement is our key debugging check
+        print("--- Rewriting topic with context ---")
+        
+        rewriter_prompt = f"""You are an expert at rewriting a user's follow-up question to be a standalone question. Understand the intent of the follow-up question and then only proceed.
+        
+        Use the provided conversation history to understand the context, and rewrite the follow-up question to be a complete question that doesn't require the history to be understood. List all the specific names or entities in the standalone question to make it understandable on its own. Do not output any extra commentary or statements.
+        Conversation History:
+        ---
+        {context}
+        ---
 
-Please consider the following summary of our previous conversation as crucial context. Ensure your new plan builds upon or explores different angles from the previous research, and does not repeat questions or search queries that have already been addressed.
+        Follow-up Question: "{topic}"
 
-Previous conversation summary:
----
-{context}
+        Standalone Question:
+        """
+        
+        standalone_topic_message = smart_llm.invoke(rewriter_prompt)
+        standalone_topic = standalone_topic_message.content
 
-As a professional research assistant, create a detailed and actionable research plan for the following topic: '{topic}'.
-    
-    Your plan must include:
-    1. A list of 3 specific research questions that need to be answered.
-    2. A list of 3 search engine queries that will be used to find relevant information.
-    
-    Ensure the plan is comprehensive and directly addresses the user's topic."""
+        # This new print statement will show us the exact topic being sent to the planner
+        print(f"--- Standalone Topic: {standalone_topic} ---")
+        
+        # Create the prompt for the main planner using the new topic
+        prompt = f"""As a professional research assistant, create a detailed and actionable research plan for the following topic: '{standalone_topic}'.
 
+The user has provided this topic as a follow-up to a previous conversation. Ensure your new plan is highly relevant and builds directly on this context. Do not suggest questions or search queries that are too generic.
+Your plan must include:
+1. A list of 3 specific research questions that need to be answered.
+2. A list of 3 search engine queries that will be used to find relevant information.
+Adhere to the guidelines and do not output any additional text or explanations.
+
+"""
     else:
+        # The original prompt for non-follow-up questions
         prompt = f"""As a professional research assistant, create a detailed and actionable research plan for the following topic: '{topic}'.
     
-    Your plan must include:
-    1. A list of 3 specific research questions that need to be answered.
-    2. A list of 3 search engine queries that will be used to find relevant information.
-    
-    Ensure the plan is comprehensive and directly addresses the user's topic."""
-
+Your plan must include:
+1. A list of 3 specific research questions that need to be answered.
+2. A list of 3 search engine queries that will be used to find relevant information.
+Adhere to the guidelines and do not output any additional text or explanations.
+"""
 
     plan = planner.invoke(prompt)
     return {"research_plan": plan}
@@ -190,15 +206,12 @@ def summarize_context(state: GraphState) -> dict:
         [f"Topic: {b.topic}\nIntroduction: {b.introduction}" for b in past_briefs]
     )
 
-    prompt = f"""Based on the user's previous research briefs, provide a concise, one-paragraph summary of their past interests and key findings. This summary will be used as context for their new research query.
+    prompt = f"""Based on the user's previous research briefs, provide a concise, one-paragraph summary of their key findings. This summary will be used as context for their new research query. Maintain all the important details and nuances.
 
 Here is the user's past research history:
 {formatted_history}
 """
     
-    # --- Learning Point: Reusing LLMs ---
-    # Context summarization is a quick, factual task, making it a
-    # perfect use case for our efficient `fast_llm`.
     summary_message = fast_llm.invoke(prompt)
     
     summary = summary_message.content

@@ -19,7 +19,7 @@ fast_llm = ChatGroq(
 # For more complex tasks like synthesizing the final brief, a more powerful
 # model might be better. We can define it here for later use.
 smart_llm = ChatGroq(
-    model_name="deepseek-r1-distill-llama-70b",
+    model_name="llama-3.3-70b-versatile",
     temperature=0.6,
 )
 
