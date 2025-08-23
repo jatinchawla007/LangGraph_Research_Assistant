@@ -68,6 +68,7 @@ async def create_research_brief(request: BriefRequest):
         "user_id": request.user_id,
         "topic": request.topic,
         "follow_up": request.follow_up,
+        "search_depth": request.search_depth
     }
 
    

@@ -8,3 +8,4 @@ pydantic
 python-dotenv
 uvicorn
 fastapi
+beautifulsoup4
