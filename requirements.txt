@@ -1,9 +1,10 @@
 langchain
 langchain-groq
 langchain-community
+langchain-tavily
+langgraph
 tavily-python
 pydantic
 python-dotenv
-sqlite3
 uvicorn
 fastapi

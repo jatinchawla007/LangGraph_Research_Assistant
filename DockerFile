@@ -13,10 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy your application code into the container
 COPY ./app /app/app
 
-COPY research_history.db .
 
 # Expose the port the app runs on
-EXPOSE 8000
+EXPOSE 8080
 
 
-CMD ["uvicorn", "app.fast_api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.fast_api:app", "--host", "0.0.0.0", "--port", "8080"]
