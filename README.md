@@ -31,11 +31,15 @@ The core of this application is a stateful graph that directs the flow of inform
 
 ```mermaid
 graph TD
-    A[Start: User Topic] --> B(Planner Node);
-    B --> C(Searcher Node);
-    C --> D(Summarizer Node);
-    D --> E(Synthesizer Node);
-    E --> F[End: Final Brief];
+    A[Start: User Input] --> B{entry_point}
+    B --> C{route_to_context_or_planner}
+    C -- "follow_up: true" --> D(summarize_context)
+    C -- "follow_up: false" --> E(generate_research_plan)
+    D --> E
+    E --> F(perform_web_search)
+    F --> G(fetch_and_summarize_content)
+    G --> H(generate_final_brief)
+    H --> I[End: FinalBrief Object]
 ```
 
 1.  **Planner**: Receives the topic and generates a `ResearchPlan`.
