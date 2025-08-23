@@ -69,8 +69,9 @@ if __name__ == "__main__":
         # user's "yes" or "no" into a True or False boolean value for our graph.
         follow_up_str = input("Is this a follow-up question? (yes/no): ")
         follow_up = follow_up_str.lower() in ['y', 'yes', 'true']
+        search_depth = input("Enter the search depth (e.g., 'basic', 'deep'): ")
 
-        inputs = {"topic": topic, "user_id": user_id, "follow_up": follow_up}
+        inputs = {"topic": topic, "user_id": user_id, "follow_up": follow_up, "search_depth": search_depth}
 
         print("\n--- Generating Research Brief... ---")
         final_state = app.invoke(inputs)

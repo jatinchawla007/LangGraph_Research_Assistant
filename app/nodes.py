@@ -1,7 +1,7 @@
 # app/nodes.py
 
 from .graph_state import GraphState
-from .llm import smart_llm, tavily_tool, fast_llm, tavily_client
+from .llm import smart_llm, fast_llm, tavily_client
 from .schemas import ResearchPlan, SourceSummary, FinalBrief
 from .database import get_briefs_by_user
 
@@ -92,7 +92,7 @@ def perform_web_search(state: GraphState) -> dict:
     for query in research_plan.search_queries:
         print(f"Searching for: '{query}'")
         try:
-            response = tavily_client.search(query=query, search_depth="basic", max_results=2)
+            response = tavily_client.search(query=query, search_depth=state["search_depth"], max_results=2)
             all_results.extend(response['results'])
         except Exception as e:
             print(f"Error searching for '{query}': {e}")

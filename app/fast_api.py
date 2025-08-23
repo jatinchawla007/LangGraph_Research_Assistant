@@ -70,10 +70,7 @@ async def create_research_brief(request: BriefRequest):
         "follow_up": request.follow_up,
     }
 
-    # --- Learning Point: Sync in Async ---
-    # LangGraph's .invoke() is a synchronous, blocking call. In a high-traffic
-    # production app, you'd run this in a separate thread pool to avoid
-    # blocking the server. For this project, a direct call is perfectly fine.
+   
     final_state = research_graph.invoke(inputs)
     brief = final_state.get("final_brief")
 

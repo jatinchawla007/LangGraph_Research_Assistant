@@ -20,6 +20,7 @@ class GraphState(TypedDict):
     topic: str
     user_id: str
     follow_up: bool
+    search_depth: str
     context_summary: Optional[str] = None
     research_plan: Optional[ResearchPlan] = None
     search_results: Optional[List[dict]] = None

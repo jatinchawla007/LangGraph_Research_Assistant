@@ -40,3 +40,4 @@ class BriefRequest(BaseModel):
     user_id: str = Field(..., description="The ID of the user requesting the brief.")
     topic: str = Field(..., description="The main topic of the research brief.")
     follow_up: bool = False
+    search_depth: str = Field(..., description="The depth of the search to perform (e.g., 'basic', 'deep').")

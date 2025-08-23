@@ -23,10 +23,6 @@ def init_db():
 
 def save_brief(user_id: str, brief: FinalBrief):
     """Saves a research brief to the database for a specific user."""
-    # --- Learning Point: Storing Complex Objects ---
-    # SQL databases don't have a Pydantic object type. The standard practice
-    # is to serialize the object into a common format like JSON, which can be
-    # stored as a simple text string. We use Pydantic's built-in .json() method.
     brief_json = brief.model_dump_json()
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
@@ -48,9 +44,6 @@ def get_briefs_by_user(user_id: str) -> List[FinalBrief]:
         briefs = []
         for row in rows:
             brief_json = row[0]
-            # --- Learning Point: Deserialization ---
-            # We do the reverse of saving: parse the JSON string from the database
-            # back into a Pydantic object to use it in our application.
             brief_object = FinalBrief.model_validate_json(brief_json)
             briefs.append(brief_object)
         
